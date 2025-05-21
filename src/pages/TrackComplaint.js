@@ -14,41 +14,28 @@ import {
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
-// Mock data for demonstration
-const mockComplaint = {
-  id: 1,
-  name: 'John Doe',
-  email: 'john@example.com',
-  subject: 'Website Issue',
-  message: 'Cannot access the website',
-  category: 'Technical Issue',
-  status: 'In Review',
-  date: '2024-03-20',
-};
-
 const validationSchema = Yup.object({
-  complaintId: Yup.string().required('Complaint ID is required'),
+  trackingId: Yup.string().required('Tracking ID is required'),
 });
 
-function TrackComplaint() {
+const TrackComplaint = () => {
   const [complaint, setComplaint] = useState(null);
-  const [error, setError] = useState('');
 
   const formik = useFormik({
     initialValues: {
-      complaintId: '',
+      trackingId: '',
     },
-    validationSchema,
+    validationSchema: validationSchema,
     onSubmit: (values) => {
-      // Here you would typically fetch the complaint from your backend
-      // For demo purposes, we'll use mock data
-      if (values.complaintId === '1') {
-        setComplaint(mockComplaint);
-        setError('');
-      } else {
-        setComplaint(null);
-        setError('Complaint not found');
-      }
+      // Simulated complaint data
+      setComplaint({
+        id: values.trackingId,
+        status: 'Under Review',
+        submittedDate: new Date().toLocaleDateString(),
+        department: 'IT',
+        subject: 'Sample Complaint',
+        description: 'This is a sample complaint description.'
+      });
     },
   });
 
@@ -74,13 +61,13 @@ function TrackComplaint() {
         <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 3 }}>
           <TextField
             fullWidth
-            id="complaintId"
-            name="complaintId"
-            label="Complaint ID"
-            value={formik.values.complaintId}
+            id="trackingId"
+            name="trackingId"
+            label="Tracking ID"
+            value={formik.values.trackingId}
             onChange={formik.handleChange}
-            error={formik.touched.complaintId && Boolean(formik.errors.complaintId)}
-            helperText={formik.touched.complaintId && formik.errors.complaintId}
+            error={formik.touched.trackingId && Boolean(formik.errors.trackingId)}
+            helperText={formik.touched.trackingId && formik.errors.trackingId}
             margin="normal"
           />
           <Button
@@ -91,15 +78,9 @@ function TrackComplaint() {
             size="large"
             sx={{ mt: 3 }}
           >
-            Track
+            Track Complaint
           </Button>
         </Box>
-
-        {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
-          </Alert>
-        )}
 
         {complaint && (
           <Card sx={{ mt: 4 }}>
@@ -109,32 +90,8 @@ function TrackComplaint() {
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box>
-                  <Typography color="textSecondary">Complaint ID</Typography>
+                  <Typography color="textSecondary">Tracking ID</Typography>
                   <Typography variant="body1">{complaint.id}</Typography>
-                </Box>
-                <Box>
-                  <Typography color="textSecondary">Name</Typography>
-                  <Typography variant="body1">{complaint.name}</Typography>
-                </Box>
-                <Box>
-                  <Typography color="textSecondary">Email</Typography>
-                  <Typography variant="body1">{complaint.email}</Typography>
-                </Box>
-                <Box>
-                  <Typography color="textSecondary">Subject</Typography>
-                  <Typography variant="body1">{complaint.subject}</Typography>
-                </Box>
-                <Box>
-                  <Typography color="textSecondary">Category</Typography>
-                  <Typography variant="body1">{complaint.category}</Typography>
-                </Box>
-                <Box>
-                  <Typography color="textSecondary">Message</Typography>
-                  <Typography variant="body1">{complaint.message}</Typography>
-                </Box>
-                <Box>
-                  <Typography color="textSecondary">Date Submitted</Typography>
-                  <Typography variant="body1">{complaint.date}</Typography>
                 </Box>
                 <Box>
                   <Typography color="textSecondary">Status</Typography>
@@ -144,6 +101,22 @@ function TrackComplaint() {
                     sx={{ mt: 1 }}
                   />
                 </Box>
+                <Box>
+                  <Typography color="textSecondary">Submitted Date</Typography>
+                  <Typography variant="body1">{complaint.submittedDate}</Typography>
+                </Box>
+                <Box>
+                  <Typography color="textSecondary">Department</Typography>
+                  <Typography variant="body1">{complaint.department}</Typography>
+                </Box>
+                <Box>
+                  <Typography color="textSecondary">Subject</Typography>
+                  <Typography variant="body1">{complaint.subject}</Typography>
+                </Box>
+                <Box>
+                  <Typography color="textSecondary">Description</Typography>
+                  <Typography variant="body1">{complaint.description}</Typography>
+                </Box>
               </Box>
             </CardContent>
           </Card>
@@ -151,6 +124,6 @@ function TrackComplaint() {
       </Paper>
     </Container>
   );
-}
+};
 
 export default TrackComplaint; 

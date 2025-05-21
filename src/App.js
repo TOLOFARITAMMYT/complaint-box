@@ -1,64 +1,34 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material';
-import CssBaseline from '@mui/material/CssBaseline';
-import Navbar from './components/Navbar';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import './App.css';
 import Home from './pages/Home';
-import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
 import TrackComplaint from './pages/TrackComplaint';
-import './styles/global.css';
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1976d2', // Blue
-    },
-    background: {
-      default: '#ffffff', // White
-    },
-  },
-  typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-    h4: {
-      fontWeight: 600,
-    },
-    h6: {
-      fontWeight: 500,
-    },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 8,
-        },
-      },
-    },
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          borderRadius: 8,
-        },
-      },
-    },
-  },
-});
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/track-complaint" element={<TrackComplaint />} />
-        </Routes>
-      </Router>
-    </ThemeProvider>
+    <Router>
+      <div className="app">
+        <nav className="navbar">
+          <div className="nav-brand">Technoville Complaint Box</div>
+          <div className="nav-links">
+            <Link to="/" className="nav-link">Home</Link>
+            <Link to="/track-complaint" className="nav-link">Track Complaint</Link>
+            <Link to="/admin" className="nav-link">Admin Login</Link>
+          </div>
+        </nav>
+
+        <div className="content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/track-complaint" element={<TrackComplaint />} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
 }
 

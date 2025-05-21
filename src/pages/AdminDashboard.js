@@ -1,141 +1,58 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Container,
-  Paper,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  TextField,
-  Button,
-  Box,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Grid,
-  Card,
-  CardContent,
-  Tooltip,
-  IconButton,
-} from '@mui/material';
-import {
-  FirstPage as FirstPageIcon,
-  LastPage as LastPageIcon,
-  KeyboardArrowLeft,
-  KeyboardArrowRight,
-} from '@mui/icons-material';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { useNavigate } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
+import '../components/Sidebar.css';
 
-// Mock data for demonstration
-const mockComplaints = [
-  {
-    id: 1,
-    name: 'John Doe',
-    email: 'john@example.com',
-    subject: 'Website Issue',
-    message: 'Cannot access the website',
-    category: 'Technical Issue',
-    status: 'Pending',
-    date: '2024-03-20',
-  },
-  // Add more mock data as needed
-];
+const statStyle = {
+  background: '#1976d2',
+  color: '#fff',
+  borderRadius: '10px',
+  padding: '1.5rem',
+  fontWeight: 'bold',
+  fontSize: '2rem',
+  textAlign: 'center',
+  flex: 1,
+  marginRight: '1rem',
+};
 
-// Custom pagination actions component
-function TablePaginationActions(props) {
-  const { count, page, rowsPerPage, onPageChange } = props;
+const AdminDashboard = () => {
+  const [complaints, setComplaints] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
+  const navigate = useNavigate();
 
-  const handleFirstPageButtonClick = (event) => {
-    onPageChange(event, 0);
-  };
+  useEffect(() => {
+    // Check if user is admin
+    const isAdmin = localStorage.getItem('isAdmin');
+    if (!isAdmin) {
+      navigate('/admin');
+      return;
+    }
 
-  const handleBackButtonClick = (event) => {
-    onPageChange(event, page - 1);
-  };
+    // Here you would typically fetch complaints from your backend
+    // For demo purposes, we'll use mock data
+    const mockComplaints = Array.from({ length: 20 }, (_, index) => ({
+      id: `COMP${index + 1}`,
+      name: `User ${index + 1}`,
+      email: `user${index + 1}@example.com`,
+      department: ['IT', 'HR', 'Finance', 'Operations'][Math.floor(Math.random() * 4)],
+      subject: `Complaint ${index + 1}`,
+      description: `This is complaint description ${index + 1}`,
+      status: ['Pending', 'Under Review', 'Resolved'][Math.floor(Math.random() * 3)],
+      date: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toLocaleDateString()
+    }));
 
-  const handleNextButtonClick = (event) => {
-    onPageChange(event, page + 1);
-  };
+    setComplaints(mockComplaints);
+  }, [navigate]);
 
-  const handleLastPageButtonClick = (event) => {
-    onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
-  };
-
-  return (
-    <Box sx={{ flexShrink: 0, ml: 2.5 }}>
-      <Tooltip title="First Page">
-        <IconButton
-          onClick={handleFirstPageButtonClick}
-          disabled={page === 0}
-          aria-label="first page"
-        >
-          <FirstPageIcon />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Previous Page">
-        <IconButton
-          onClick={handleBackButtonClick}
-          disabled={page === 0}
-          aria-label="previous page"
-        >
-          <KeyboardArrowLeft />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Next Page">
-        <IconButton
-          onClick={handleNextButtonClick}
-          disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-          aria-label="next page"
-        >
-          <KeyboardArrowRight />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Last Page">
-        <IconButton
-          onClick={handleLastPageButtonClick}
-          disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-          aria-label="last page"
-        >
-          <LastPageIcon />
-        </IconButton>
-      </Tooltip>
-    </Box>
-  );
-}
-
-function AdminDashboard() {
-  const [complaints, setComplaints] = useState(mockComplaints);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+  const handleLogout = () => {
+    localStorage.removeItem('isAdmin');
+    navigate('/admin');
   };
 
   const handleStatusChange = (complaintId, newStatus) => {
-    setComplaints(
-      complaints.map((complaint) =>
+    setComplaints(prevComplaints =>
+      prevComplaints.map(complaint =>
         complaint.id === complaintId
           ? { ...complaint, status: newStatus }
           : complaint
@@ -143,195 +60,134 @@ function AdminDashboard() {
     );
   };
 
-  const handleDelete = (complaintId) => {
-    setComplaints(complaints.filter((complaint) => complaint.id !== complaintId));
+  // Pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = complaints.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(complaints.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
-  const filteredComplaints = complaints.filter((complaint) => {
-    const matchesSearch =
-      complaint.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      complaint.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      complaint.subject.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === 'all' || complaint.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  // Stats
+  const total = 120;
+  const pending = 45;
+  const inReview = 25;
+  const resolved = 50;
 
-  // Stats data
-  const stats = {
-    total: complaints.length,
-    resolved: complaints.filter((c) => c.status === 'Resolved').length,
-    pending: complaints.filter((c) => c.status === 'Pending').length,
-    inReview: complaints.filter((c) => c.status === 'In Review').length,
-  };
-
-  const chartData = [
-    { name: 'Resolved', value: stats.resolved },
-    { name: 'Pending', value: stats.pending },
-    { name: 'In Review', value: stats.inReview },
+  // Pie chart data (hardcoded for now)
+  const pieData = [
+    { label: 'Staff', value: 1, color: '#1976d2' },
+    { label: 'Facilities', value: 3, color: '#64b5f6' },
+    { label: 'Safety', value: 1, color: '#90caf9' },
   ];
+  // Line chart data (hardcoded for now)
+  const lineData = [0, 1, 2, 3, 4, 6];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Jun'];
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Admin Dashboard
-      </Typography>
-
-      {/* Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Total Complaints
-              </Typography>
-              <Typography variant="h5">{stats.total}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Resolved
-              </Typography>
-              <Typography variant="h5">{stats.resolved}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Pending
-              </Typography>
-              <Typography variant="h5">{stats.pending}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                In Review
-              </Typography>
-              <Typography variant="h5">{stats.inReview}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      {/* Chart */}
-      <Paper sx={{ p: 2, mb: 4 }} className="chart-container">
-        <Typography variant="h6" gutterBottom>
-          Complaint Status Distribution
-        </Typography>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <RechartsTooltip />
-            <Legend />
-            <Bar dataKey="value" fill="#1976d2" />
-          </BarChart>
-        </ResponsiveContainer>
-      </Paper>
-
-      {/* Filters */}
-      <Box sx={{ mb: 2, display: 'flex', gap: 2 }}>
-        <TextField
-          label="Search"
-          variant="outlined"
-          size="small"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ flexGrow: 1 }}
-        />
-        <FormControl size="small" sx={{ minWidth: 200 }}>
-          <InputLabel>Status</InputLabel>
-          <Select
-            value={statusFilter}
-            label="Status"
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <MenuItem value="all">All</MenuItem>
-            <MenuItem value="Pending">Pending</MenuItem>
-            <MenuItem value="In Review">In Review</MenuItem>
-            <MenuItem value="Resolved">Resolved</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-
-      {/* Complaints Table */}
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Subject</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredComplaints
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((complaint) => (
-                <TableRow key={complaint.id}>
-                  <TableCell>{complaint.id}</TableCell>
-                  <TableCell>{complaint.name}</TableCell>
-                  <TableCell>{complaint.email}</TableCell>
-                  <TableCell>{complaint.subject}</TableCell>
-                  <TableCell>{complaint.category}</TableCell>
-                  <TableCell>
-                    <Select
-                      value={complaint.status}
-                      size="small"
-                      onChange={(e) =>
-                        handleStatusChange(complaint.id, e.target.value)
-                      }
-                    >
-                      <MenuItem value="Pending">Pending</MenuItem>
-                      <MenuItem value="In Review">In Review</MenuItem>
-                      <MenuItem value="Resolved">Resolved</MenuItem>
-                    </Select>
-                  </TableCell>
-                  <TableCell>{complaint.date}</TableCell>
-                  <TableCell>
-                    <Button
-                      color="error"
-                      size="small"
-                      onClick={() => handleDelete(complaint.id)}
-                    >
-                      Delete
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={filteredComplaints.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          ActionsComponent={TablePaginationActions}
-          labelRowsPerPage="Rows per page:"
-          labelDisplayedRows={({ from, to, count }) =>
-            `${from}-${to} of ${count}`
-          }
-        />
-      </TableContainer>
-    </Container>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#f5f7fa' }}>
+      <Sidebar />
+      <div style={{ flex: 1, padding: '2.5rem 2rem' }}>
+        <h1 style={{ fontWeight: 700, marginBottom: '1.5rem' }}>Dashboard</h1>
+        {/* Stat Cards */}
+        <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '2rem' }}>
+          <div style={{ ...statStyle, background: '#1976d2', color: '#fff', marginRight: 0 }}>
+            <div style={{ fontSize: '1rem', fontWeight: 500 }}>Total Complaints</div>
+            <div style={{ fontSize: '2.5rem', fontWeight: 700 }}>{total}</div>
+          </div>
+          <div style={{ ...statStyle, background: '#fff', color: '#1976d2', border: '1px solid #e3e8f0' }}>
+            <div style={{ fontSize: '1rem', fontWeight: 500 }}>Pending</div>
+            <div style={{ fontSize: '2.5rem', fontWeight: 700 }}>{pending}</div>
+          </div>
+          <div style={{ ...statStyle, background: '#fff', color: '#1976d2', border: '1px solid #e3e8f0' }}>
+            <div style={{ fontSize: '1rem', fontWeight: 500 }}>In Review</div>
+            <div style={{ fontSize: '2.5rem', fontWeight: 700 }}>{inReview}</div>
+          </div>
+          <div style={{ ...statStyle, background: '#fff', color: '#1976d2', border: '1px solid #e3e8f0' }}>
+            <div style={{ fontSize: '1rem', fontWeight: 500 }}>Resolved</div>
+            <div style={{ fontSize: '2.5rem', fontWeight: 700 }}>{resolved}</div>
+          </div>
+        </div>
+        {/* Main Content Row */}
+        <div style={{ display: 'flex', gap: '2rem' }}>
+          {/* Recent Complaints Table */}
+          <div style={{ flex: 2 }}>
+            <div style={{ fontWeight: 600, fontSize: '1.2rem', marginBottom: '1rem' }}>Recent Complaints</div>
+            <div style={{ background: '#fff', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead style={{ background: '#f5f7fa' }}>
+                  <tr style={{ background: '#f5f7fa' }}>
+                    <th style={{ padding: '0.75rem', textAlign: 'left', color: '#888', fontWeight: 500 }}>Subject</th>
+                    <th style={{ padding: '0.75rem', textAlign: 'left', color: '#888', fontWeight: 500 }}>Category</th>
+                    <th style={{ padding: '0.75rem', textAlign: 'left', color: '#888', fontWeight: 500 }}>Date</th>
+                    <th style={{ padding: '0.75rem', textAlign: 'left', color: '#888', fontWeight: 500 }}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentItems.map((c, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                      <td style={{ padding: '0.75rem' }}>{c.subject}</td>
+                      <td style={{ padding: '0.75rem' }}>{c.department}</td>
+                      <td style={{ padding: '0.75rem' }}>{c.date}</td>
+                      <td style={{ padding: '0.75rem', color: c.status === 'Resolved' ? '#388e3c' : c.status === 'Pending' ? '#f57c00' : '#1976d2', fontWeight: 600 }}>{c.status}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div style={{ textAlign: 'right', marginTop: '0.5rem' }}>
+              <a href="#" style={{ color: '#1976d2', fontWeight: 500, textDecoration: 'none' }}>View All &rarr;</a>
+            </div>
+          </div>
+          {/* Charts */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            {/* Pie Chart */}
+            <div style={{ background: '#fff', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', padding: '1.5rem', marginBottom: '1rem' }}>
+              <div style={{ fontWeight: 600, fontSize: '1.1rem', marginBottom: '1rem' }}>Complaints by Category</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <svg width="90" height="90" viewBox="0 0 32 32">
+                  <circle r="16" cx="16" cy="16" fill="#e3e8f0" />
+                  <path d="M16 16 L16 0 A16 16 0 0 1 31.2 22.4 Z" fill="#1976d2" />
+                  <path d="M16 16 L31.2 22.4 A16 16 0 0 1 8 30.9 Z" fill="#64b5f6" />
+                  <path d="M16 16 L8 30.9 A16 16 0 0 1 16 0 Z" fill="#90caf9" />
+                </svg>
+                <div>
+                  {pieData.map((d, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 4 }}>
+                      <span style={{ display: 'inline-block', width: 12, height: 12, background: d.color, borderRadius: '50%' }}></span>
+                      <span style={{ color: '#333', fontWeight: 500 }}>{d.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* Line Chart */}
+            <div style={{ background: '#fff', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', padding: '1.5rem' }}>
+              <div style={{ fontWeight: 600, fontSize: '1.1rem', marginBottom: '1rem' }}>Complaints Overview</div>
+              <svg width="180" height="70" style={{ background: '#f5f7fa', borderRadius: 8 }}>
+                <polyline
+                  fill="none"
+                  stroke="#1976d2"
+                  strokeWidth="3"
+                  points="0,60 36,50 72,40 108,30 144,20 180,10"
+                />
+                {lineData.map((v, i) => (
+                  <circle key={i} cx={i * 36} cy={60 - v * 10} r="3.5" fill="#1976d2" />
+                ))}
+              </svg>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#888', marginTop: 4 }}>
+                {months.map((m, i) => (
+                  <span key={i}>{m}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
-}
+};
 
 export default AdminDashboard; 
