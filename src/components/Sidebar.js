@@ -8,19 +8,30 @@ const Sidebar = () => {
     <div className="sidebar">
       <div className="sidebar-header">
         <div className="sidebar-icon">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="13" rx="2" fill="#fff"/><rect x="7" y="3" width="10" height="4" rx="1" fill="#fff"/></svg>
+          <i className="fas fa-inbox-in fa-2x"></i>
         </div>
         <div className="sidebar-title">Complaint Box</div>
       </div>
       <nav className="sidebar-nav">
         <Link to="/admin/dashboard" className={`sidebar-link${location.pathname === '/admin/dashboard' ? ' active' : ''}`}> 
-          <span className="sidebar-link-icon">🏠</span> Dashboard
+          <i className="sidebar-link-icon fas fa-chart-line"></i>
+          Dashboard
         </Link>
         <Link to="/admin/complaints" className={`sidebar-link${location.pathname === '/admin/complaints' ? ' active' : ''}`}> 
-          <span className="sidebar-link-icon">📄</span> Complaints
+          <i className="sidebar-link-icon fas fa-clipboard-list"></i>
+          Complaints
+        </Link>
+        <Link to="/admin/users" className={`sidebar-link${location.pathname === '/admin/users' ? ' active' : ''}`}> 
+          <i className="sidebar-link-icon fas fa-users"></i>
+          Users
+        </Link>
+        <Link to="/admin/settings" className={`sidebar-link${location.pathname === '/admin/settings' ? ' active' : ''}`}> 
+          <i className="sidebar-link-icon fas fa-cog"></i>
+          Settings
         </Link>
         <Link to="/admin/profile" className={`sidebar-link${location.pathname === '/admin/profile' ? ' active' : ''}`}> 
-          <span className="sidebar-link-icon">👤</span> Profile
+          <i className="sidebar-link-icon fas fa-user-circle"></i>
+          Profile
         </Link>
       </nav>
     </div>

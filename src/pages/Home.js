@@ -1,115 +1,132 @@
 import React, { useState } from 'react';
 
+const categories = [
+  'Service',
+  'Billing',
+  'Product',
+  'Staff',
+  'Other',
+];
+
 const Home = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    department: '',
-    subject: '',
-    description: ''
+    phone: '',
+    category: '',
+    details: '',
+    file: null,
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value
+    const { name, value, files } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: files ? files[0] : value,
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Here you would typically send the data to your backend
-    console.log('Form submitted:', formData);
-    // Reset form
+    // Submission logic will be added later
+    alert('Complaint submitted!');
     setFormData({
       name: '',
       email: '',
-      department: '',
-      subject: '',
-      description: ''
+      phone: '',
+      category: '',
+      details: '',
+      file: null,
     });
-    alert('Complaint submitted successfully!');
   };
 
   return (
     <div className="content">
-      <div className="form-container">
-        <h1 className="form-title">Submit a Complaint</h1>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="name">Full Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              className="form-input"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
+      <div className="complaint-form-card">
+        <h1 className="complaint-form-title">Complaint Form</h1>
+        <form className="complaint-form" onSubmit={handleSubmit}>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="name">Full Name</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                className="form-input"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="email">Email Address</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="form-input"
+              />
+            </div>
           </div>
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              className="form-input"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="phone">Phone Number <span className="optional">(optional)</span></label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                className="form-input"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="category">Complaint Category</label>
+              <select
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                required
+                className="form-select"
+              >
+                <option value="">Select Category</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
           </div>
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="department">Department</label>
-            <select
-              id="department"
-              name="department"
-              className="form-select"
-              value={formData.department}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Department</option>
-              <option value="IT">IT</option>
-              <option value="HR">HR</option>
-              <option value="Finance">Finance</option>
-              <option value="Operations">Operations</option>
-              <option value="Other">Other</option>
-            </select>
+          <div className="form-row">
+            <div className="form-group full-width">
+              <label htmlFor="details">Complaint Details</label>
+              <textarea
+                id="details"
+                name="details"
+                value={formData.details}
+                onChange={handleChange}
+                required
+                className="form-textarea"
+              />
+            </div>
+            <div className="form-group full-width">
+              <label htmlFor="file">File Attachment <span className="optional">(optional)</span></label>
+              <input
+                type="file"
+                id="file"
+                name="file"
+                onChange={handleChange}
+                className="form-input"
+              />
+              <span className="file-chosen">{formData.file ? formData.file.name : 'No file chosen'}</span>
+            </div>
           </div>
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="subject">Subject</label>
-            <input
-              type="text"
-              id="subject"
-              name="subject"
-              className="form-input"
-              value={formData.subject}
-              onChange={handleChange}
-              required
-            />
+          <div className="form-actions">
+            <button type="submit" className="form-button">Submit</button>
           </div>
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              name="description"
-              className="form-textarea"
-              value={formData.description}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <button type="submit" className="form-button">
-            Submit Complaint
-          </button>
         </form>
       </div>
     </div>
